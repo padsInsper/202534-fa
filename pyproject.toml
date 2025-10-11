@@ -1,0 +1,17 @@
+[project]
+name = "202534-fa"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fpppy>=0.0.3",
+    "pandas>=2.3.3",
+    "plotly>=6.3.1",
+    "plotnine>=0.15.0",
+    "python-bcb>=0.3.3",
+    "seaborn>=0.13.2",
+    "statsforecast>=2.0.2",
+    "statsmodels>=0.14.5",
+    "utilsforecast>=0.2.14",
+]
