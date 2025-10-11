@@ -9,8 +9,6 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
-from datetime import datetime
 import warnings
 from statsforecast import StatsForecast
 from statsforecast.models import (
@@ -22,10 +20,8 @@ from statsforecast.models import (
     HoltWinters,
     MSTL
 )
-from utilsforecast.evaluation import evaluate
 from utilsforecast.plotting import plot_series
 from statsmodels.tsa.stattools import kpss
-from statsmodels.stats.diagnostic import acorr_ljungbox
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from statsmodels.tsa.seasonal import seasonal_decompose
 # Nota: MSTL não expõe componentes diretamente como STL
