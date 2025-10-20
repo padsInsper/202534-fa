@@ -82,6 +82,8 @@ sf_decomp = StatsForecast(
 # Ajustando para decomposição
 decomposition = sf_decomp.fit(dados).fitted_[0, 0].model_
 
+decomposition.plot()
+
 # Plot da decomposição (simplificado)
 fig, axes = plt.subplots(4, 1, figsize=(12, 10))
 axes[0].plot(dados['ds'], dados['y'])

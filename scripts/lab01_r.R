@@ -36,11 +36,13 @@ print(dados)
 # 2. EXPLORAÇÃO E VISUALIZAÇÃO
 # ============================
 
+dados |>
+  dplyr::mutate(vendas_1 = lag(vendas, 1), vendas_2 = lag(vendas, 2)) |>
+  with(cor(vendas, vendas_2, use = "complete.obs"))
+
 # Plot da série temporal
 p1 <- dados |>
-  autoplot(vendas) +
-  labs(title = "Série Temporal Original", x = "Tempo", y = "Vendas") +
-  theme_minimal()
+  gg_tsdisplay(vendas)
 
 print(p1)
 
