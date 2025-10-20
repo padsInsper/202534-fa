@@ -6,12 +6,16 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fpppy>=0.0.3",
+    "jupyter>=1.1.1",
     "pandas>=2.3.3",
     "plotly>=6.3.1",
     "plotnine>=0.15.0",
+    "pyqt6>=6.9.1",
     "python-bcb>=0.3.3",
+    "pytk>=0.0.2.1",
     "seaborn>=0.13.2",
     "statsforecast>=2.0.2",
     "statsmodels>=0.14.5",
+    "tcl>=0.2",
     "utilsforecast>=0.2.14",
 ]
