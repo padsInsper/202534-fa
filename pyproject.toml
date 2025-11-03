@@ -7,11 +7,13 @@ requires-python = ">=3.12"
 dependencies = [
     "fpppy>=0.0.3",
     "jupyter>=1.1.1",
+    "nixtla>=0.7.0",
     "pandas>=2.3.3",
     "plotly>=6.3.1",
     "plotnine>=0.15.0",
     "pyqt6>=6.9.1",
     "python-bcb>=0.3.3",
+    "python-dotenv>=1.2.1",
     "pytk>=0.0.2.1",
     "seaborn>=0.13.2",
     "statsforecast>=2.0.2",

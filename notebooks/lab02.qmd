@@ -12,7 +12,8 @@ format:
 
 ```{r}
 #' Nosso objetivo é descobrir qual a ordem do ARIMA usando análise descritiva
-
+#p=2, d=0, q=0, 
+#modelo ARIMA(2,0,0)
 # gerando os dados --------------------------------------------------------
 
 ar <- sample(0:2, 1)
@@ -45,6 +46,12 @@ q = MA = 1 (moving average)
 
 $$
 y_t = \alpha + \phi_1 y_{t-1} + \epsilon_t + \theta_1 \epsilon_{t-1}  
+$$
+
+No nosso caso, ARIMA(2,0,0)
+
+$$
+y_t = \alpha + \phi_1 y_{t-1} + \phi_2 y_{t-2} + \epsilon_t
 $$
 
 
@@ -91,7 +98,7 @@ def plotar_serie(y):
     ax2 = fig.add_subplot(gs[1, 0])
     ax3 = fig.add_subplot(gs[1, 1])
     ax1.plot(y, marker="o")
-    ax1.set_ylabel("difference(Exports)")
+    ax1.set_ylabel("y")
     ax1.set_xlabel("Month")
     plot_acf(y, ax2, zero=False, lags=24, bartlett_confint=False, auto_ylims=True)
     plot_pacf(y, ax3, zero=False, lags=24, auto_ylims=True)
@@ -155,7 +162,8 @@ plotar_serie(dif)
 ```{r}
 fit <- dados_tsibble |>
   fabletools::model(
-    arima_manual = fable::ARIMA(y ~ 1 + pdq(1, 1, 0) + PDQ(0, 0, 0)),
+    arima_manual1 = fable::ARIMA(y ~ 1 + pdq(1, 1, 1) + PDQ(0, 0, 0)),
+    arima_manual2 = fable::ARIMA(y ~ 1 + pdq(2, 1, 0) + PDQ(0, 0, 0)),
     stepwise = fable::ARIMA(y ~ 1 + PDQ(0, 0, 0)),
     search = fable::ARIMA(y ~ 1 + PDQ(0, 0, 0), stepwise = FALSE)
   )
@@ -291,6 +299,14 @@ dados <- dados_raw |>
 ```
 
 
+$$
+y_t = \alpha + \phi_1 y_{t-1} + \Phi y_{t-12} + \epsilon_t
+$$
+
+$$
+\Delta^{12} y_t = y_t - y_{t-12}
+$$
+
 ```{r}
 # série deflacionada
 dados |>
@@ -326,7 +342,7 @@ SARIMA(p,d=0,q)(P,D=1,Q)
 
 ```{r}
 tdata |>
-  features(value, unitroot_nsdiffs)
+  features(value, list(unitroot_ndiffs, unitroot_nsdiffs))
 ```
 
 
@@ -334,6 +350,13 @@ tdata |>
 tdata |>
   mutate(value = difference(value, 12)) |>
   features(value, unitroot_ndiffs)
+
+```
+
+```{r}
+tdata |>
+  mutate(value = difference(value, 1)) |>
+  features(value, unitroot_nsdiffs)
 
 ```
 
@@ -369,10 +392,12 @@ de seleção das ordens do modelo.
 
 ![](https://otexts.com/fpp3/figs/arimaflowchart.png)
 
+ARIMA(1,0,0)(2,1,1)[12]
+
 ```{r}
 fit <- tdata |>
   model(
-    arima_manual = ARIMA(value ~ 1 + pdq(0, 0, 2) + PDQ(0, 1, 1)),
+    arima_manual = ARIMA(value ~ 1 + pdq(1, 0, 0) + PDQ(2, 1, 1)),
     stepwise = ARIMA(value),
     search = ARIMA(value, stepwise = FALSE)
   )
