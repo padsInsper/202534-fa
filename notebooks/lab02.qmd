@@ -233,10 +233,7 @@ print(ar_parm)
 print(ma_parm)
 ```
 
-
-
 # Continuando...
-
 
 ```{r}
 library(fpp3)

@@ -5,9 +5,9 @@ format: html
 
 Séries temporais hierárquicas podem ser de três tipos:
 
-- **Aninhada**: quando as séries são aninhadas, como por exemplo, a venda de um produto em diferentes regiões do país.
-- **Cruzada**: quando as séries não são aninhadas, mas possuem uma relação entre si, como por exemplo, a venda de produtos de diferentes categorias.
-- **Mista**: quando as séries são aninhadas e cruzadas, como por exemplo, a venda de produtos de diferentes categorias em diferentes regiões do país.
+-   **Aninhada**: quando as séries são aninhadas, como por exemplo, a venda de um produto em diferentes regiões do país.
+-   **Cruzada**: quando as séries não são aninhadas, mas possuem uma relação entre si, como por exemplo, a venda de produtos de diferentes categorias.
+-   **Mista**: quando as séries são aninhadas e cruzadas, como por exemplo, a venda de produtos de diferentes categorias em diferentes regiões do país.
 
 Exemplo de série temporal aninhada:
 
@@ -32,7 +32,7 @@ tourism <- tsibble::tourism |>
 tourism_hts <- tourism |>
   aggregate_key(State / Region, Trips = sum(Trips))
 
-#view(as_tibble(tourism_hts))
+view(tourism_hts)
 tail(tourism_hts)
 
 tourism_hts |>
@@ -45,6 +45,7 @@ tourism_hts |>
 ## ----seasonStates, echo=FALSE, fig.cap="Seasonal plots for overnight trips for Queensland and the Northern Territory, and Victoria and Tasmania highlighting the contrast in seasonal patterns between northern and southern states in Australia.", fig.asp=0.5, fig.width=7, out.width="80%", message=FALSE, warning=FALSE----
 tourism_hts |>
   filter(
+      #State %in% c("NT", "QLD", ...)
     State == "NT" | State == "QLD" | State == "TAS" | State == "VIC",
     is_aggregated(Region)
   ) |>
@@ -203,7 +204,6 @@ tourism_full |>
 
 O método Bottom-Up (BU) consiste em prever as séries temporais de menor nível e depois agregá-las para obter as previsões das séries de maior nível. Esse método é útil quando as séries temporais de menor nível são mais fáceis de prever do que as séries de maior nível. Por exemplo, as séries temporais de menor nível podem ser mais estáveis e menos voláteis do que as séries de maior nível. Nesse caso, o método BU pode produzir previsões mais precisas do que o método Top-Down (TD).
 
-
 ```{r}
 ## ----tourism_states, message=FALSE------------------------------------------------------------------------
 tourism_states <- tourism |>
@@ -224,9 +224,7 @@ fcasts_national <- fcasts_state |>
 
 Usando a função `reconcile()`:
 
-
 ```{r}
-## ----bottom_up, message=FALSE-----------------------------------------------------------------------------
 tourism_states |>
   model(ets = ETS(Trips)) |>
   reconcile(bu = bottom_up(ets)) |>
@@ -237,8 +235,7 @@ tourism_states |>
 
 Meta-código para o método Bottom-Up:
 
-
-```r
+``` r
 data |>
   aggregate_key() |>
   model() |>
@@ -250,12 +247,11 @@ data |>
 
 O método Top-Down (TD) consiste em prever as séries temporais de maior nível e depois desagregá-las para obter as previsões das séries de menor nível. Esse método é útil quando as séries temporais de maior nível são mais fáceis de prever do que as séries de menor nível. Por exemplo, as séries temporais de maior nível podem ser mais estáveis e menos voláteis do que as séries de menor nível. Nesse caso, o método TD pode produzir previsões mais precisas do que o método Bottom-Up (BU).
 
-
 Existem várias técnicas top-down, incluindo:
 
-- **Proporção média**: a proporção é calculada fazendo-se a razão entre a série de menor nível e a série de maior nível, e depois tomando-se a média. No R, isso é implementado usando `method = "average_proportions"` da função `top_down()`.
+-   **Proporção média**: a proporção é calculada fazendo-se a razão entre a série de menor nível e a série de maior nível, e depois tomando-se a média. No R, isso é implementado usando `method = "average_proportions"` da função `top_down()`.
 
-- **Proporção da média**: a proporção é calculada fazendo-se a razão entre a média das séries de menor nível e a média das séries de maior nível. No R, isso é implementado usando `method = "proportion_averages"` da função `top_down()`.
+-   **Proporção da média**: a proporção é calculada fazendo-se a razão entre a média das séries de menor nível e a média das séries de maior nível. No R, isso é implementado usando `method = "proportion_averages"` da função `top_down()`.
 
 Existe uma terceira técnica que consiste em calcular as proporções a partir dos forecasts. No R, isso é implementado usando `method = "forecast_proportions"` da função `top_down()`. Essa técnica pode produzir previsões mais precisas do que as duas primeiras técnicas, mas é mais difícil de implementar.
 
@@ -263,7 +259,7 @@ Finalmente, existem técnicas que combinam BU e TD. Por exemplo, podemos usar o 
 
 ## Minimum Trace (MinT)
 
-O método Minimum Trace (MinT) consiste em minimizar a variância total das previsões dentro do grupo de previsões coerentes. O método MinT é implementado no R usando a função `min_trace()`, com diversas variações ("wsl_struct", "mint_cov", "mint_shrink", "ols").
+O método Minimum Trace (MinT) consiste em minimizar a variância total das previsões dentro do grupo de previsões coerentes. O método MinT é implementado no R usando a função `min_trace()`, com diversas variações ("wsl_struct", "mint_cov", "nk",mint_shri "ols").
 
 Do livro do Hyndman:
 
@@ -284,7 +280,8 @@ fit <- tourism_full |>
     mint = min_trace(base, method = "mint_shrink"),
   )
 
-fc <- fit |> forecast(h = "2 years")
+fc <- fit |>
+  forecast(h = "2 years")
 
 fc |>
   filter(is_aggregated(Region), is_aggregated(Purpose)) |>
@@ -304,6 +301,15 @@ fc |>
   labs(y = "Trips ('000)") +
   facet_wrap(vars(Purpose), scales = "free_y")
 ```
+
+Tabela comparativa do ChatGPT:
+
+| **Método MINT** | **Matriz de covariância dos erros assumida ((W_h))** | **Descrição intuitiva** | **Vantagens** | **Limitações** | **Situação ideal de uso** |
+|------------|------------|------------|------------|------------|------------|
+| **MINT-OLS** | (W_h = k_h I) (matriz identidade escalada) | Assume que todos os erros têm a mesma variância e são independentes | Simples, rápido, coerente | Ignora diferenças de variância e correlações entre séries | Quando não há estimativas confiáveis das variâncias dos erros |
+| **MINT-WLS** | (W_h = k_h , \text{diag}(\hat{W}\_1)) (matriz diagonal com variâncias individuais) | Pondera cada série de acordo com a variância dos erros de previsão | Leva em conta que algumas séries são mais incertas que outras | Ainda ignora correlações entre séries | Quando se conhece ou pode estimar bem as variâncias individuais |
+| **MINT-SHRINK** | (W_h = k_h , \hat{W}\_{shrink}) (matriz de covariância ajustada com shrinkage) | Usa uma estimativa “encolhida” da covariância completa, equilibrando variância e estabilidade | Compromisso entre precisão e robustez; reduz sobreajuste | Requer mais cálculo e escolha de parâmetro de shrinkage | Quando há número moderado de séries e amostra limitada |
+| **MINT-FULL (ou MINT-SAMPLE)** | (W_h = k_h , \hat{W}\_h) (covariância completa estimada dos erros) | Utiliza toda a estrutura de covariância entre séries | Teoricamente ótimo; minimiza o erro total reconciliado | Pode ser instável se a amostra for pequena ou séries muito correlacionadas | Quando há muitas observações e estimativas estáveis da covariância |
 
 ```{r}
 # erro no nivel mais agregado
